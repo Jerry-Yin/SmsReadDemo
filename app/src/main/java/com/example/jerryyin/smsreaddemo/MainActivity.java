@@ -51,6 +51,7 @@ public class MainActivity extends ActionBarActivity {
     public static String mAddress;
 
     public static File mFile = null;
+    public static String mDir = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class MainActivity extends ActionBarActivity {
         mTxtMsgBody = (TextView) findViewById(R.id.txt_message_body);
 
 //        createFile();
+        createDir();
 
         Intent intent = new Intent(this, ReceiveMsgService.class);
         startService(intent);
@@ -148,84 +150,36 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
-//    public class MessageReceiver extends BroadcastReceiver {
-//
-//        private String messageBody;
-//        private String address;
-//
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-////            Toast.makeText(MainActivity.this, "收到一条广播！", Toast.LENGTH_SHORT).show();
-//            //提取短信消息
-//            Bundle bundle = intent.getExtras();
-//            //使用 pdu 密钥来􏰀取 一个 SMS pdus 数组,其中每一个 pdu 都表示一条短信消息
-//            Object[] pdus = (Object[]) bundle.get("pdus");
-//            SmsMessage[] messages = new SmsMessage[pdus.length];
-//            for (int i = 0; i < messages.length; i++) {
-//                messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-//            }
-//
-//            address = messages[0].getOriginatingAddress();   //发送方号码
-//            MainActivity.mAddress = address;
-//
-//            //凭借短信内容
-//            for (SmsMessage message : messages) {
-//                messageBody += message.getMessageBody();
-//            }
-//
-//            MainActivity.mMessageBody = messageBody;
-//
-//            setAndSaveMsg();
-//
-////            abortBroadcast();
-//
-//        }
-//    }
 
-//    public static void setAndSaveMsg() {
-////        if (TextUtils.isEmpty(mAddress) || TextUtils.isEmpty(mMessageBody)){
-//        Toast.makeText(MainActivity.this, "正在存储数据！", Toast.LENGTH_SHORT).show();
-//        mTxtAddress.setText(mAddress);
-//        mTxtMsgBody.setText(mMessageBody);
-//
-//        String data = "from：" + mAddress + "\n" + "message: " + mMessageBody;
-//
-//        /**
-//         * 文件存储在外置sd卡根目录的 /MyMessage/ 文件夹下
-//         */
-////        String dir = Environment.getExternalStorageDirectory() + "/MyMessage";
-////        File file = new File(dir, "MyMessage.txt");
-//
-//        FileOutputStream outputStream = null;
-//        BufferedWriter writer = null;
-//        //数据写入文件
-//        try {
-//            outputStream = openFileOutput("MyMessage.txt", MODE_PRIVATE);
-////            outputStream = new FileOutputStream(file);
-//            writer = new BufferedWriter(new OutputStreamWriter(outputStream));
-//            writer.write(data);
-//
-//            Toast.makeText(MainActivity.this, "数据存储成功，路径: "  + " MyMessage.txt", Toast.LENGTH_SHORT).show();
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//            Toast.makeText(MainActivity.this, "文件MyMessage.txt 未找到", Toast.LENGTH_SHORT).show();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            Toast.makeText(MainActivity.this, "文件流异常！！", Toast.LENGTH_SHORT).show();
-//        } finally {
-//            if (writer != null) {
-//                try {
-//                    writer.close();
-//
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
+    //判断有无sd_card(是否插入)
+    public boolean haveSdCard(){
+        String status = Environment.getExternalStorageState();
+        if (status.equals(Environment.MEDIA_MOUNTED)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //然后根据是否插入状态指定目录
+    public String toDir(){
+        if (haveSdCard()) {
+            mDir = Environment.getExternalStorageDirectory() + "/AMessage";
+        }
+//        else {
+//            dir = NOSDCARD_DIR;
 //        }
-//
-////        }
-//    }
+        return mDir;
+    }
+
+    //创建文件夹
+    public void createDir(){
+        File destDir = new File(toDir());
+        if (!destDir.exists()) {
+            destDir.mkdirs();
+            Toast.makeText(MainActivity.this, "文件已经创建完毕!", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     protected void onDestroy() {

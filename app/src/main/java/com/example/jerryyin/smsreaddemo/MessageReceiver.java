@@ -31,6 +31,9 @@ public class MessageReceiver extends BroadcastReceiver {
     private String fileName = null;
     private String time = null;
 
+    private String dir =  Environment.getExternalStorageDirectory() +"/AMessage";
+    private String data = null;
+
     @Override
     public void onReceive(Context context, Intent intent) {
 //            Toast.makeText(MainActivity.this, "收到一条广播！", Toast.LENGTH_SHORT).show();
@@ -51,7 +54,6 @@ public class MessageReceiver extends BroadcastReceiver {
         Date curDate = new Date(System.currentTimeMillis());//获取当前时间
         time = formatter.format(curDate);
         fileName = address + " " +time+".txt";    //文件名
-//        fileName = address +".txt";    //文件名
 
         //凭借短信内容
         for (SmsMessage message : messages) {
@@ -67,29 +69,18 @@ public class MessageReceiver extends BroadcastReceiver {
     }
 
     private void setAndSaveMsg(Context context) {
-//        if (TextUtils.isEmpty(mAddress) || TextUtils.isEmpty(mMessageBody)){
         Toast.makeText(context, "正在存储数据！", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "正在存储数据");
-//        mTxtAddress.setText(mAddress);
-//        mTxtMsgBody.setText(mMessageBody);
 
-        String data ="from：" + address + "\n" + "message: " + messageBody + "\n" + "time: " + time;
+        data ="from：" + address + "\n" + "message: " + messageBody + "\n" + "time: " + time;
 
         /**
          * 文件存储在外置sd卡根目录的 /MyMessage/ 文件夹下
          */
-        String dir = String.valueOf(Environment.getExternalStorageDirectory());
-        File file = null;
-//        if (MainActivity.mFile != null) {
-//            file = MainActivity.mFile;
-//        } else {
-////            dir = Environment.getExternalStorageDirectory() + "/MyMessage";
-//            dir = String.valueOf(Environment.getExternalStorageDirectory());
-//            dataName = "AMessage.txt";
-//            file = new File(dir, dataName);
-//        }
-        file = new File(dir, fileName);
+//        dir = Environment.getExternalStorageDirectory() +"/AMessage" ;
+//        createDir();
 
+        File file = new File(dir, fileName);
         FileOutputStream outputStream = null;
         BufferedWriter writer = null;
         //数据写入文件
@@ -102,6 +93,7 @@ public class MessageReceiver extends BroadcastReceiver {
             Toast.makeText(context, "数据存储成功，路径: " + dir + fileName, Toast.LENGTH_SHORT).show();
             Log.d(TAG, "数据:" + fileName + " " + data);
             Log.d(TAG, "数据存储成功");
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             Toast.makeText(context, "文件" + fileName + "未找到", Toast.LENGTH_SHORT).show();
@@ -112,14 +104,47 @@ public class MessageReceiver extends BroadcastReceiver {
             if (writer != null) {
                 try {
                     writer.close();
+                    data = null;
+                    messageBody = null;
+                    address = null;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
-
-//        }
     }
 
+
+    //判断有无sd_card(是否插入)
+    public boolean haveSdCard(){
+        String status = Environment.getExternalStorageState();
+        if (status.equals(Environment.MEDIA_MOUNTED)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //然后根据是否插入状态指定目录
+    public String toDir(){
+        if (haveSdCard()) {
+            dir = Environment.getExternalStorageDirectory() + "/AMessage";
+        }
+//        else {
+//            dir = NOSDCARD_DIR;
+//        }
+       return dir;
+    }
+
+    //创建文件夹
+    public void createDir(){
+//        if (dir != null){
+//
+//        }
+        File destDir = new File(toDir());
+        if (!destDir.exists()) {
+            destDir.mkdirs();
+        }
+    }
 }
 

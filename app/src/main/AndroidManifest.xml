@@ -9,6 +9,8 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!--在sdcard中创建/删除文件的权限 -->
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"></uses-permission>
 
     <application
         android:allowBackup="true"
@@ -31,7 +33,18 @@
             <!--</intent-filter>-->
         <!--</receiver>-->
 
-        <service android:name=".ReceiveMsgService"></service>
+        <service android:name=".ReceiveMsgService">
+        </service>
+
+        <!-- 通过系统的一些广播，比如：手机重启、界面唤醒、应用状态改变等等监听并捕获到，然后判断我们的Service是否还存活，别忘记加权限啊。-->
+        <receiver android:name="BootReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.PACKAGE_RESTARTED" />
+                <action android:name="com.example.jerryyin.smsreaddemo.destroy" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
